@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "base_config": "${PROJECT_ROOT}/configs/paper3090_detector_safety_smol.json",
+  "results_root": "${PROJECT_ROOT}/results/detector_safety/smol",
+  "generated_config_dir": "${PROJECT_ROOT}/configs/generated",
+  "generated_config_namespace": "tpds_multiseed_detector_smol",
+  "reference_results": [],
+  "seeds": [7, 42, 123],
+  "include_experiments": ["detector_smol17b"],
+  "Ns": [16],
+  "policies": ["NoSpec", "SpecSched", "SpecSched-Safe"],
+  "aggregate_policies": ["NoSpec", "SpecSched", "SpecSched-Safe"],
+  "summary_files": ["scheduler_all_summary.csv"],
+  "focus_policy": "SpecSched-Safe",
+  "paired_baselines": ["SpecSched"],
+  "skip_existing": true
+}

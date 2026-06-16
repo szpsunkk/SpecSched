@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "base_config": "${PROJECT_ROOT}/configs/paper3090_pythia_model_targeted.json",
+  "results_root": "${PROJECT_ROOT}/results/tpds_multiseed_pythia_model",
+  "generated_config_dir": "${PROJECT_ROOT}/configs/generated",
+  "generated_config_namespace": "tpds_multiseed_pythia_model",
+  "reference_results": [],
+  "seeds": [7, 42, 123],
+  "include_experiments": ["pythia_model_core"],
+  "Ns": [16],
+  "policies": [
+    "NoSpec",
+    "FixedK-1",
+    "FixedK-3",
+    "TETRIS-Proxy",
+    "SpecSched"
+  ],
+  "aggregate_policies": [
+    "NoSpec",
+    "FixedK-1",
+    "FixedK-3",
+    "TETRIS-Proxy",
+    "SpecSched"
+  ],
+  "summary_files": ["scheduler_all_summary.csv"],
+  "focus_policy": "SpecSched",
+  "skip_existing": true
+}

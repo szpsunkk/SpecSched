@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "base_config": "${PROJECT_ROOT}/configs/paper3090_edge_practical.json",
+  "results_root": "${PROJECT_ROOT}/results/tpds_multiseed_edge_practical",
+  "generated_config_dir": "${PROJECT_ROOT}/configs/generated",
+  "generated_config_namespace": "tpds_multiseed_edge_practical",
+  "reference_results": [],
+  "seeds": [7, 42, 123],
+  "include_experiments": ["edge_main_beta15"],
+  "Ns": [4, 8],
+  "policies": [
+    "NoSpec",
+    "FixedK-1",
+    "FixedK-3",
+    "IndepOpt",
+    "TETRIS-Proxy",
+    "SpecSched",
+    "SpecSched-Safe"
+  ],
+  "aggregate_policies": [
+    "NoSpec",
+    "FixedK-1",
+    "FixedK-3",
+    "IndepOpt",
+    "TETRIS-Proxy",
+    "SpecSched",
+    "SpecSched-Safe"
+  ],
+  "summary_files": ["scheduler_main_summary.csv"],
+  "focus_policy": "SpecSched",
+  "skip_existing": true
+}

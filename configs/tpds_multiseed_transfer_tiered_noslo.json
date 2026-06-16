@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "base_config": "${PROJECT_ROOT}/configs/paper3090_transfer_gpu.json",
+  "results_root": "${PROJECT_ROOT}/results/tpds_multiseed_transfer_tiered_noslo",
+  "generated_config_dir": "${PROJECT_ROOT}/configs/generated",
+  "generated_config_namespace": "tpds_multiseed_transfer_tiered_noslo",
+  "reference_results": [
+    {
+      "seed": 7,
+      "processed_summary": "${PROJECT_ROOT}/results/transfer_gpu/processed/scheduler_transfer_gpu_summary.csv"
+    }
+  ],
+  "seeds": [
+    42,
+    123
+  ],
+  "include_experiments": [
+    "transfer_tiered_slo"
+  ],
+  "Ns": [
+    64
+  ],
+  "policies": [
+    "FixedK-1",
+    "FixedK-3",
+    "FixedK-5",
+    "FixedK-7",
+    "SpecSched",
+    "SpecSched-NoSLO"
+  ],
+  "aggregate_policies": [
+    "FixedK-1",
+    "FixedK-3",
+    "FixedK-5",
+    "FixedK-7",
+    "SpecSched",
+    "SpecSched-NoSLO"
+  ],
+  "summary_files": [
+    "scheduler_transfer_gpu_summary.csv"
+  ],
+  "group_fields": [
+    "tag",
+    "kind",
+    "configured_kv_blocks"
+  ],
+  "focus_policy": "SpecSched",
+  "paired_baselines": [
+    "SpecSched-NoSLO"
+  ],
+  "skip_existing": true
+}

@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "experiment": {
+    "name": "paper3090_heterog_poisson_pilot",
+    "seed": 7
+  },
+  "paths": {
+    "results_root": "${PROJECT_ROOT}/results/heterog_poisson_pilot",
+    "legacy_results_roots": [],
+    "trace": "${PROJECT_ROOT}/data/sharegpt_trace.json"
+  },
+  "models": {
+    "target": "${PROJECT_ROOT}/models/models--Qwen--Qwen2.5-7B-Instruct",
+    "draft": "${PROJECT_ROOT}/models/models--Qwen--Qwen2.5-0.5B-Instruct",
+    "target_label": "Qwen2.5-7B-Instruct",
+    "draft_label": "Qwen2.5-0.5B-Instruct",
+    "draft_backend": "local"
+  },
+  "cuda": {
+    "pytorch_cuda_alloc_conf": "expandable_segments:True"
+  },
+  "execution": {
+    "python": "python",
+    "isolate_by": "experiment_n",
+    "continue_on_error": false,
+    "skip_existing": false
+  },
+  "common": {
+    "fixed_ks": [1],
+    "kmax": 7,
+    "block_tokens": 16,
+    "max_batch": 4,
+    "cache_replay_chunk_tokens": 32,
+    "calib_requests": 6,
+    "requests_per_N": 32,
+    "adaptive_slo_tpot_mult": 1.5,
+    "adaptive_slo_ttft_mult": 2.0,
+    "adaptive_slo_scope": "bucket",
+    "arrival_model": "poisson",
+    "arrival_rate_rps": 0.8
+  },
+  "experiments": [
+    {
+      "name": "main_beta15_poisson_pilot",
+      "kind": "main",
+      "tag": "paper3090_main_beta15_poisson_pilot",
+      "Ns": [32],
+      "kv_blocks": 1024,
+      "max_new_tokens": 128,
+      "output_lengths": [32, 64, 128],
+      "prompt_hard_max": 768,
+      "beta": 1.5,
+      "policies": [
+        "NoSpec",
+        "FixedK-1",
+        "TETRIS-Proxy",
+        "SpecSched"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "experiment": {
+    "name": "paper3090_pressure_aimd_quick",
+    "seed": 7
+  },
+  "paths": {
+    "results_root": "${PROJECT_ROOT}/results/pressure_aimd_quick",
+    "legacy_results_roots": [],
+    "trace": "${PROJECT_ROOT}/data/sharegpt_trace.json"
+  },
+  "models": {
+    "target": "${PROJECT_ROOT}/models/models--Qwen--Qwen2.5-7B-Instruct",
+    "draft": "${PROJECT_ROOT}/models/models--Qwen--Qwen2.5-0.5B-Instruct",
+    "target_label": "Qwen2.5-7B-Instruct",
+    "draft_label": "Qwen2.5-0.5B-Instruct",
+    "draft_backend": "local"
+  },
+  "cuda": {
+    "pytorch_cuda_alloc_conf": "expandable_segments:True"
+  },
+  "execution": {
+    "python": "python",
+    "isolate_by": "experiment_n",
+    "continue_on_error": false,
+    "skip_existing": false
+  },
+  "common": {
+    "fixed_ks": [1, 3],
+    "kmax": 3,
+    "block_tokens": 16,
+    "max_batch": 4,
+    "max_admit_per_step": 4,
+    "backpressure_pressure_threshold": 1.0,
+    "backpressure_delay_threshold_s": 0.25,
+    "backpressure_cost": 0.25,
+    "backpressure_alpha_floor": 0.72,
+    "backpressure_urgency_cap": 1.10,
+    "backpressure_opportunistic_k": 2,
+    "backpressure_opportunistic_alpha": 0.70,
+    "backpressure_opportunistic_pressure": 0.25,
+    "backpressure_opportunistic_delay_ratio": 0.25,
+    "backpressure_opportunistic_kv_pressure": 0.70,
+    "backpressure_fastpath_kv_pressure": 0.88,
+    "pressure_aimd_pressure_threshold": 0.75,
+    "pressure_aimd_delay_threshold_s": 0.25,
+    "pressure_aimd_add": 0.20,
+    "pressure_aimd_mult": 0.65,
+    "pressure_aimd_min": 1.0,
+    "pressure_aimd_max": 2.0,
+    "pressure_aimd_recovery_pressure": 0.20,
+    "pressure_aimd_recovery_delay_ratio": 0.20,
+    "pressure_aimd_delay_gain": 0.35,
+    "pressure_aimd_cost": 0.35,
+    "pressure_aimd_alpha_floor": 0.70,
+    "pressure_aimd_extra_budget_frac": 0.50,
+    "pressure_aimd_stable_pressure": 0.25,
+    "pressure_aimd_stable_delay_ratio": 0.25,
+    "pressure_aimd_active_pressure": 2.0,
+    "cache_replay_chunk_tokens": 32,
+    "calib_requests": 3,
+    "adaptive_slo_tpot_mult": 1.5,
+    "adaptive_slo_ttft_mult": 2.0,
+    "adaptive_slo_scope": "bucket"
+  },
+  "experiments": [
+    {
+      "name": "poisson_n32_quick",
+      "kind": "main",
+      "tag": "paper3090_pressure_aimd_quick_n32",
+      "Ns": [32],
+      "requests_per_N": 32,
+      "arrival_model": "poisson",
+      "arrival_rate_rps": 24.0,
+      "kv_blocks": 1024,
+      "max_new_tokens": 96,
+      "output_lengths": [32, 64, 96],
+      "prompt_hard_max": 768,
+      "beta": 1.5,
+      "policies": ["FixedK-1", "SpecSched-PressureAIMD"]
+    }
+  ]
+}

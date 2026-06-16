@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "base_config": "${PROJECT_ROOT}/configs/paper3090_v3_kcap3.json",
+  "results_root": "${PROJECT_ROOT}/results/eagle2_compare",
+  "generated_config_dir": "${PROJECT_ROOT}/configs/generated",
+  "generated_config_namespace": "tpds_multiseed_eagle2_compare",
+  "reference_results": [],
+  "seeds": [
+    7,
+    42,
+    123
+  ],
+  "include_experiments": [
+    "main_beta15"
+  ],
+  "Ns": [
+    16,
+    32,
+    64
+  ],
+  "policies": [
+    "NoSpec",
+    "FixedK-1",
+    "FixedK-3",
+    "TETRIS-Proxy",
+    "EAGLE-2-Proxy",
+    "SpecServe-Proxy",
+    "SpecSched"
+  ],
+  "aggregate_policies": [
+    "NoSpec",
+    "FixedK-1",
+    "FixedK-3",
+    "TETRIS-Proxy",
+    "EAGLE-2-Proxy",
+    "SpecServe-Proxy",
+    "SpecSched"
+  ],
+  "paired_baselines": [
+    "EAGLE-2-Proxy",
+    "SpecServe-Proxy"
+  ],
+  "skip_existing": true
+}

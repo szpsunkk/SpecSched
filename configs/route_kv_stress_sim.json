@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "experiment": {
+    "name": "route_kv_joint_stress_sim",
+    "seed": 7,
+    "description": "Calibrated simulation for routing, remote-KV latency, and KV/load joint stress. This does not rerun GPU inference."
+  },
+  "paths": {
+    "raw_dir": "${PROJECT_ROOT}/results/raw/route_kv_stress_sim",
+    "processed_dir": "${PROJECT_ROOT}/results/processed",
+    "source_main_summary": "${PROJECT_ROOT}/results/tpds_multiseed_main/processed/main_multiseed_summary.csv",
+    "source_kv_summary": "${PROJECT_ROOT}/results/tpds_multiseed_kv_pressure/processed/main_multiseed_summary.csv"
+  },
+  "simulation": {
+    "concurrency_N": [16, 32, 64],
+    "kv_blocks": [512, 1024],
+    "route_delays_ms": [0, 2, 5, 10],
+    "routing_modes": ["local-only", "random", "kv-aware", "oracle"],
+    "replicates": 5,
+    "base_policy": "SpecSched",
+    "remote_hit_base": {
+      "local-only": 0.0,
+      "random": 0.42,
+      "kv-aware": 0.68,
+      "oracle": 0.82
+    },
+    "oscillation_base": {
+      "local-only": 0.00,
+      "random": 0.22,
+      "kv-aware": 0.07,
+      "oracle": 0.03
+    },
+    "migration_base": {
+      "local-only": 0.00,
+      "random": 0.36,
+      "kv-aware": 0.16,
+      "oracle": 0.08
+    },
+    "max_goodput_jitter": 0.025,
+    "max_latency_jitter": 0.035
+  }
+}

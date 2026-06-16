@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "base_config": "${PROJECT_ROOT}/configs/paper3090_second_model_slo_sensitivity.json",
+  "results_root": "${PROJECT_ROOT}/results/tpds_multiseed_second_model_slo_sensitivity",
+  "generated_config_dir": "${PROJECT_ROOT}/configs/generated",
+  "generated_config_namespace": "tpds_multiseed_second_model_slo_sensitivity",
+  "reference_results": [],
+  "seeds": [7, 42, 123],
+  "include_experiments": ["second_model_slo_beta125", "second_model_slo_beta20"],
+  "Ns": [32],
+  "policies": [
+    "NoSpec",
+    "FixedK-1",
+    "FixedK-3",
+    "TETRIS-Proxy",
+    "SpecSched"
+  ],
+  "aggregate_policies": [
+    "NoSpec",
+    "FixedK-1",
+    "FixedK-3",
+    "TETRIS-Proxy",
+    "SpecSched"
+  ],
+  "summary_files": ["scheduler_slo_sensitivity_summary.csv"],
+  "group_fields": ["configured_beta"],
+  "expected_groups": [
+    {"configured_beta": "1.25"},
+    {"configured_beta": "2.0"}
+  ],
+  "focus_policy": "SpecSched",
+  "skip_existing": true
+}

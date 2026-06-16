@@ -1,0 +1,693 @@
+\documentclass[10pt,journal,onecolumn]{IEEEtran}
+
+% ===================== 宏包 =====================
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{algorithm,algorithmic}
+\usepackage{graphicx}
+\usepackage{booktabs,multirow,array}
+\usepackage[table]{xcolor}
+\usepackage{colortbl}
+\usepackage{pifont}
+\usepackage{cite}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage{amsmath, amssymb}
+
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{assumption}{Assumption}
+
+\definecolor{best}{HTML}{D4EDDA}
+\definecolor{second}{HTML}{D1ECF1}
+\definecolor{rowhi}{HTML}{FFF3CD}
+\definecolor{negbad}{HTML}{F8D7DA}
+\definecolor{posgood}{HTML}{D4EDDA}
+\definecolor{tabgray}{HTML}{F5F5F5}
+
+\newcommand{\cmark}{\checkmark}
+\newcommand{\xmark}{$\times$}
+\newcommand{\best}[1]{\cellcolor{best}{\bfseries #1}}
+\newcommand{\secondb}[1]{\cellcolor{second}#1}
+\newcommand{\pos}[1]{\textcolor{green!50!black}{{\bfseries #1}}}
+\newcommand{\bad}[1]{\textcolor{red!70!black}{#1}}
+\newcommand{\dON}[1]{\cellcolor{green!18}{\bfseries #1}}
+\newcommand{\dOFF}[1]{\cellcolor{gray!22}#1}
+\newcommand{\gcheck}{{\color{green!50!black}\ding{51}}}
+\newcommand{\rcross}{{\color{gray!65}\ding{55}}}
+\newcommand{\heat}[2]{\cellcolor{blue!#1!white}#2}
+\newcommand{\ind}{\mathbb{I}}
+
+\newcommand{\system}{SpecSched}
+
+\begin{document}
+
+\title{Supplementary Appendix for \\ SpecSched: Cache-Coupled Speculative Scheduling for Multi-Tenant LLM Serving}
+\author{}
+\maketitle
+\appendices
+
+\section{Stress Coverage, Overhead, and Artifact Scope}
+\label{app:stress-overhead-artifact}
+
+\subsection{Stress Coverage and Failure Modes}
+\label{sec:stress-failure}
+
+The stress evidence separates three collapse modes rather than treating
+all high-load failures as one phenomenon. First, verifier saturation
+appears when long drafts cannot be converted into efficient verification
+batches. The NoBatch ablation in the main-paper ablation results reduces
+goodput by about one third at both $N=32$ and $N=64$, showing that
+accepted-token potential is insufficient without batching control.
+Second, KV thrashing appears when cache residency is invisible to the
+speculative scheduler. The NoEvict row at $N=64$ keeps raw progress
+possible but loses 68.7\% SLO-aware goodput and 0.64 SLO-attainment
+points because requests wait behind a saturated cache. Third,
+speculation collapse appears when the draft path itself is
+unprofitable. The warm-up detector disables unsafe local model pairs and
+the Jetson remote path before they consume SLO slack. These measured
+cases support the local control claim: \system{} needs batching,
+resident-aware cache control, and fallback detection together.
+
+The route variable adds a distributed failure surface. A route-aware
+deployment can add two additional modes: routing oscillation, where
+requests move between verifier pools faster than KV reuse can amortize
+migration, and remote-KV degradation, where a higher remote hit rate is
+offset by fetch latency. The current artifact cannot execute those
+cluster-level controls natively, so Appendix~\ref{app:route-kv-sim}
+reports a calibrated route/KV stress simulation. It supports the
+mechanism that route cost and cache residency interact, but it is not
+used as a native distributed-serving performance claim.
+
+\subsection{Scheduling Overhead}
+\label{sec:overhead}
+
+The implementation records CPU-side timing for candidate selection,
+marginal allocation, KV accounting, and cleanup. A dedicated
+microbenchmark sweeps $N\in\{8,16,32,64\}$ and
+$k_{\max}\in\{3,5,7\}$ on the local 0.5B/0.5B pair. Mean scheduler
+overhead is 123--295~$\mu$s per epoch, and the end-to-end scheduler
+fraction stays below 0.3\% in every cell, consistent with the
+$O(N k_{\max}+N\log N)$ bound proved in the main text.
+We use this microbenchmark as a reproducibility and scaling check, not
+a headline performance result.
+
+\subsection{Artifact Scope}
+\label{sec:artifact-scope}
+
+The artifact supports result-level reproducibility. It includes
+experiment configurations, saved raw and processed CSV/JSON summaries,
+plotting scripts, generated figures and tables, and claim-audit checks.
+From saved outputs, \texttt{make tpds-results-reproduce} regenerates
+the reported plots and tables and verifies that headline numerical
+claims match the processed results. The Docker path is intentionally
+saved-output only: it runs without CUDA, PyTorch, vLLM, model
+checkpoints, traces, or Jetson access. Full GPU and edge reruns require
+the listed hardware, model checkpoints, trace inputs, and
+CUDA/PyTorch/vLLM environment. Dockerized one-command GPU reruns and
+formal artifact-evaluation packaging remain outside the submitted
+evidence.
+
+\section{Evaluation Matrix and Setup Details}
+\label{app:evaluation-scope}
+
+This appendix records scope, notation, and diagnostic evidence that
+would interrupt the main experimental narrative. It does not add new
+headline claims beyond the measured vLLM-based artifact. In particular,
+the current manuscript does not include production-trace generality,
+native speculative-serving comparisons, multi-GPU tensor parallelism,
+optimized edge RPC, 24-hour cost or energy studies, or Dockerized
+one-command GPU reruns. The model-pair, pressure, overhead, and
+open-loop controller tables below are therefore boundary diagnostics
+and reproducibility aids, not additional leaderboards.
+
+The current artifact does not include production traces such as Azure
+LLM inference traces, BurstGPT, or WildChat, nor does it include
+2-GPU tensor-parallel verification, cross-host profitability beyond
+the Jetson SSH/JSONL path, or 24-hour endurance and cost/energy
+studies. TETRIS, EAGLE-2, and SpecServe are common-executor scheduler
+proxies. They do not replace native integrations with feature-level
+draft generators, tree drafting, optimized communication, or runtime
+overlap. Native EAGLE-2/SpecInfer reproduction, native AdaSpec
+integration, composition with SGLang/RadixAttention and LMCache-style
+reusable KV layers, disaggregated prefill/decode integration,
+Dockerized one-command reruns, GPU reruns, and formal
+artifact-evaluation packaging remain engineering extensions rather
+than current experimental evidence. The result-level artifact checks
+saved outputs and claims but does not convert those missing
+experiments into evidence.
+
+The same scope boundary applies to system-wide KV-cache control. The
+route/KV simulation adds a controlled stress surface over route delay,
+remote-hit ratio, migration, concurrency, and KV budget, but it is not
+a native cluster measurement. The current artifact still does not
+measure real remote cache hits, inter-GPU KV migration, request
+routing among verifier pools, or prefill/decode tier placement. Those
+native dimensions remain extension work before claiming
+distributed-control stability. We also use several 2026 arXiv
+preprints as related-work signposts for fast-moving speculative
+serving and concurrency-control work. They were verified as preprints
+during manuscript preparation, but they should not be read as archival
+baselines. Native-system comparisons against those systems remain out
+of scope for the current artifact.
+
+Table~\ref{tab:evidence-roadmap} maps the main reviewer-risk items to
+their current evidence status. Its purpose is to make the paper's scope
+auditable: rows marked as measured support claims in the main text,
+whereas rows marked as future work require new experiments before they
+can support stronger conclusions.
+
+\subsection{Single-User Draft-Length Reference}
+\label{app:single-user-opt}
+
+For a single user $i$ with acceptance rate $\alpha_i$ and exclusive
+access to the target model, the standard draft-length objective is
+\begin{equation}
+    \label{eq:single-opt}
+    k_i^* = \arg\max_{k} \;
+    \frac{G_i(k)}{c_d \cdot k + c_v(k)},
+\end{equation}
+where $c_d$ is the per-token draft cost and $c_v(k)$ is the
+verification cost for $k$ tokens. Under the i.i.d.\ approximation
+($\alpha_\ell=\alpha_i$ for all $\ell$), the familiar closed-form
+rule~\cite{leviathan2023fast,xia2024unlocking} is
+\begin{equation}
+    \label{eq:single-opt-closed}
+    k_i^* =
+    \left\lfloor
+    \frac{-1}{\ln \alpha_i}
+    \cdot \ln\!\left(\frac{c_v'(0)}{c_d}\right)
+    \right\rfloor .
+\end{equation}
+This reference is useful only as a contrast: in shared serving,
+$c_v(k)$ is not private to request $i$, because batch size, padded
+draft length, and the other active users jointly determine the
+realized verifier cost.
+
+\begin{table*}[t]
+\centering
+\caption{Evidence roadmap for the revised TPDS framing. Measured rows
+are supported by the current artifact. Future-work rows are intentionally
+not used as evidence for headline claims.}
+\label{tab:evidence-roadmap}
+\scriptsize
+\setlength{\tabcolsep}{3.0pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{@{}p{0.20\textwidth}p{0.34\textwidth}p{0.18\textwidth}p{0.20\textwidth}@{}}
+\toprule
+\textit{Reviewer-risk item} & \textit{Current manuscript handling} &
+\textit{Status} & \textit{Claim supported} \\
+\midrule
+BestFixed comparison & Three-seed closed-loop and Poisson paired CIs
+cross zero against the offline fixed-$k$ envelope & measured boundary &
+Online control approaches the tuned envelope, not dominance \\
+BestFixed transfer stress & Calibrated diagnostic over workload shift,
+bursty arrivals, and tiered SLOs compares one global fixed depth,
+phase-tuned fixed depth, and \system{} & simulation diagnostic &
+Online adaptation advantage when a single fixed depth is mismatched \\
+Measured transfer replay & Three-seed GPU replay covers workload shift,
+bursty arrivals, and tiered SLOs at $N=64$ against the best full-run
+fixed depth from $k\in\{1,3,5,7\}$. A tiered-SLO supplement also
+includes \system{}-NoSLO & measured diagnostic, not headline evidence &
+Current measured replay is mixed-to-negative, so measured replay is the
+authoritative boundary for the transfer claim \\
+Proxy baseline scope & TETRIS, EAGLE-2, and SpecServe rows use the same
+executor, traces, KV manager, and SLO calibration & measured proxy &
+Scheduler-signal comparison only \\
+KV eviction ranking & Three-seed KV-pressure cells compare LRU,
+longest-context-first, H2O-style, vLLM-style, and future-value eviction
+under selected budgets & measured boundary & Cache residency should be
+visible, but no static rule is universal \\
+Unsafe model pairs and edge path & Warm-up detector results cover unsafe
+Qwen2.5-1.5B/0.5B, SmolLM2, profitable Pythia, and Jetson remote drafting
+& measured safety & Disable unprofitable speculation before it consumes
+SLO slack \\
+Scheduler overhead & CPU-side microbenchmark sweeps $N$ and $k_{\max}$
+on a local model pair & measured diagnostic & Online bookkeeping is not
+the observed bottleneck \\
+Routing and remote-KV stress & Calibrated simulation sweeps
+local-only, random, KV-aware, and oracle routes under route delay, KV
+budget, and concurrency & simulation diagnostic & Route/KV/load coupling
+and oscillation failure modes \\
+\midrule
+Fine-grained component ablation & Would separate resident weighting,
+re-prefill budget, future-value eviction, padding-aware batching, and
+detector effects individually & future work & Per-module causal
+attribution \\
+Native or faithful speculative baselines & Would integrate native
+TETRIS, EAGLE-2/SpecInfer, or AdaSpec/SpecServe runtime behavior &
+future work & End-to-end system comparison \\
+Datacenter or multi-GPU serving & Would repeat target/draft and
+prefill/decode disaggregation on A100/H100/L40S-class or multi-GPU pools
+& future work & Hardware-general performance claim \\
+Phase-tuned transfer oracle on GPU & Would run per-phase fixed-depth
+oracles, recovery-time metrics, and paired confidence intervals across
+the three measured non-stationary traces & future work &
+Stronger measured separation between one global fixed depth and online
+adaptation \\
+Native routing-aware speculative scheduling & Would add real model or
+verifier-pool routing, measured remote-KV hits, and routing stability
+constraints & future work & Native distributed serving control claim \\
+Native disaggregated KV-cache placement & Would measure remote cache
+fetch latency, migration cost, and prefill/decode tier placement in a
+cluster runtime & future work & System-wide KV-resource claim \\
+Production joint stress & Would add burst intensity and real cluster
+routing to the current simulation surface & future work & Stability
+under coupled production stress \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{figures_scientific/bestfixed_stress_scientific.pdf}
+    \caption{Calibrated BestFixed transfer stress diagnostic at $N=64$.
+    The simulation contrasts one global fixed draft depth with a
+    phase-tuned fixed-depth oracle and \system{} under workload shift,
+    bursty arrivals, and tiered SLOs. It is a mechanism illustration,
+    not headline measured evidence.}
+    \label{fig:bestfixed-stress}
+\end{figure*}
+
+% Inlined from ../paper_assets/tables/bestfixed_stress_sim.tex.
+\begin{table}[t]
+\centering
+\caption{Calibrated BestFixed transfer stress diagnostic at $N=64$.
+Values are simulation means over five deterministic replicates.}
+\label{tab:bestfixed-stress}
+\scriptsize
+\setlength{\tabcolsep}{3.0pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+Scenario & Method & Goodput $\uparrow$ & P99 $\downarrow$ & Recovery $\downarrow$ \\
+\midrule
+Shift & BestFixed & 66.0 & 1247 & 45 \\
+Shift & \system{} & 78.1 & 1289 & 18 \\
+Bursty & BestFixed & 67.8 & 1256 & 25 \\
+Bursty & \system{} & 78.3 & 1250 & 10 \\
+Tiered & BestFixed & 69.1 & 1245 & 0 \\
+Tiered & \system{} & 80.1 & 1245 & 0 \\
+\bottomrule
+\end{tabular}
+\vspace{-0.5em}
+\end{table}
+
+Table~\ref{tab:param-summary} summarizes the symbols and defaults used
+by the formulation, algorithm, and experiments. Unless otherwise
+stated, the scheduler uses $\gamma=0.3$, warm-starts
+$\hat{\alpha}_{i}=0.8$, and sets $\lambda_v=1$, $\eta=0.2$,
+$\zeta=0.1$, $\lambda_p=0.1$, and $\lambda_e=0.5$. Runtime quantities
+such as $N$, $C_v(t)$, $M_{\text{KV}}$, $Q_i(t)$, and
+\textsc{KeepValue} are measured or computed per experiment rather than
+tuned per baseline.
+
+\begin{table*}[t]
+\centering
+\caption{Parameter and symbol summary. Defaults apply unless a
+specific experiment overrides them. Runtime state variables are logged
+per run rather than fixed globally.}
+\label{tab:param-summary}
+\scriptsize
+\setlength{\tabcolsep}{3.0pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{@{}p{0.13\textwidth}p{0.32\textwidth}p{0.18\textwidth}p{0.27\textwidth}@{}}
+\toprule
+\textit{Symbol} & \textit{Meaning} & \textit{Location} & \textit{Default or role} \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{Workload and SLO variables}} \\
+\cmidrule(l){1-4}
+$N$ & Number of concurrent users or active requests & Evaluation & Swept over $4,8,16,32,64$. Main three-seed claims use $16,32,64$ \\
+$\tau_i^{\text{SLO}}$ & TPOT target for user $i$ & Main-text SLO definition & Calibrated from NoSpec by output-length bucket \\
+$\beta_i$ & SLO multiplier used to set $\tau_i^{\text{SLO}}$ & Main-text SLO definition and setup & Medium setting $1.5$. Sensitivity uses $\{1.25,1.5,2.0\}$ \\
+$Q_i(t)$ & Virtual queue measuring accumulated SLO risk & Main-text virtual queue & Runtime state, capped to prevent monopolization \\
+$L_i(t)$ & Context length of request $i$ & System model & Runtime state updated after accepted tokens \\
+$r_i(t)$ & Serving route for request $i$ & Main-text route capacity and joint objective & Fixed to $r_{\mathrm{local}}$ in the measured artifact \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{Speculation and verifier controls}} \\
+\cmidrule(l){1-4}
+$k_i$ & Draft length assigned to request $i$ & Main-text joint objective & Chosen online from $\{0,\ldots,k_{\max}\}$ \\
+$k_{\max}$ & Maximum draft length considered by the scheduler & Algorithm and overhead study & Configuration cap. Overhead study sweeps $3,5,7$ \\
+$\hat{\alpha}_{i}(t)$ & Estimated draft-token acceptance probability & Main-text acceptance estimator & Warm-start $0.8$, updated by EMA \\
+$\gamma$ & EMA smoothing parameter for acceptance estimates & Main-text acceptance estimator & $0.3$ \\
+$C_v(t)$ & Verifier-token capacity available in epoch $t$ & Resource constraint & Profiled runtime budget \\
+$C_v^r(t)$ & Route-specific verifier-token capacity & Main-text compute constraint & Reduces to $C_v(t)$ for $r_{\mathrm{local}}$ \\
+$\lambda_v$ & Weight on verifier-load cost in the objective & Main-text joint objective & $1$ \\
+$\lambda_p$ & Weight on padding cost in the objective & Main-text joint objective & $0.1$ \\
+$\ell_r(t)$, $\lambda_r$ & Route cost and its objective weight & Main-text eviction cost and joint objective & $\ell_r=0$ in current experiments, nonzero for remote KV or migration studies \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{KV-cache and fallback controls}} \\
+\cmidrule(l){1-4}
+$M_{\text{KV}}$ & KV-cache block budget & Main-text memory constraint & Configured per experiment \\
+$M_{\text{perm}}$, $M_{\text{temp}}$, $M_{\text{act}}$ & Permanent KV, temporary speculative KV, and activation/scratch usage & Main-text KV decomposition & Runtime memory accounting \\
+$h_i(t)$ & Indicator that request $i$'s KV-cache is resident & System state & $1$ resident, $0$ evicted \\
+$R_{\text{prefill}}(t)$ & Re-prefill admission budget per epoch & Main-text re-prefill budget & Derived from $r_{\max}C_v(t)$ \\
+$\eta$ & Weight on incremental KV pressure in marginal allocation & Main-text marginal score & $0.2$ \\
+$\zeta$ & Weight on context-length imbalance in batch composition & Main-text padding cost & $0.1$ \\
+\textsc{KeepValue}$_i(t)$ & Expected future generated-token value per resident KV and route cost & Main-text eviction cost & Computed online from $\bar{w}_iG_i(k_i^\star,t)/(b_i(L_i)+\mu\ell_{r_i})$ \\
+$\lambda_e$ & Weight on resident cache value in the objective & Main-text joint objective & $0.5$ \\
+$\epsilon$ & Minimum warm-up throughput margin for enabling speculation & Main-text speculation detector & $0.05$ \\
+$\rho_{\text{prefill}}(t)$, $\theta_{\text{prefill}}$ & Sliding-window re-prefill rate and overload threshold & Main-text re-prefill monitor & Diagnostic degradation hook, not a headline-tuned result \\
+\bottomrule
+\end{tabular}
+\vspace{-0.5em}
+\end{table*}
+
+Table~\ref{tab:exp-setup} summarizes the measured artifact coverage.
+The main scheduler and KV-pressure results use the vLLM-based
+scheduler path. Each run records seed, model path, SLO mode, KV
+budget, maximum batch size, peak GPU allocation, per-epoch scheduler
+overhead, and cache events. The logged verifier-load ratio is a
+pre-trimming pressure indicator, not a claim about executed
+target-batch infeasibility.
+
+\begin{table*}[t]
+\centering
+\caption{Evaluation groups and evidence scope in the current artifact.
+Three-seed groups support the main statistical claims. Diagnostic
+groups bound practical failure modes and are not presented as
+production-trace or native-system comparisons.}
+\label{tab:exp-setup}
+\scriptsize
+\setlength{\tabcolsep}{2.0pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{@{}p{0.10\textwidth}p{0.13\textwidth}p{0.17\textwidth}p{0.16\textwidth}p{0.07\textwidth}p{0.30\textwidth}@{}}
+\toprule
+\textit{Role} & \textit{Hardware} & \textit{Target / draft} &
+\textit{Workload} & \textit{$N$} & \textit{Claim / scope} \\
+\midrule
+\multicolumn{6}{@{}l}{\textit{Headline comparisons}} \\
+\cmidrule(l){1-6}
+\rowcolor{rowhi}Scheduler & RTX~3090~Ti & Qwen2.5-7B / Qwen2.5-0.5B &
+ShareGPT/LMSYS-style output lengths &
+4, 8, 16, 32, 64 & Common-executor scheduler comparison under calibrated SLOs \\
+\rowcolor{rowhi}KV pressure & RTX~3090~Ti & Qwen2.5-7B / Qwen2.5-0.5B &
+Long-output ShareGPT/LMSYS traces &
+16, 32, 64 & Cache-regime boundary with no universal eviction-rule claim \\
+\midrule
+\multicolumn{6}{@{}l}{\textit{Boundary and safety diagnostics}} \\
+\cmidrule(l){1-6}
+Model pairs & RTX~3090~Ti &
+Qwen2.5-1.5B/0.5B, SmolLM2-1.7B/135M, Pythia-2.8B/160M &
+Short ShareGPT/LMSYS traces &
+16, 32 & Model-pair safety and transfer boundaries \\
+Edge practical & RTX~3090~Ti + 3 Jetsons & Qwen2.5-7B / Qwen2.5-0.5B &
+ShareGPT, Tailscale/SSH draft RPC &
+4, 8 & Safe fallback on a real remote-draft path \\
+\midrule
+\multicolumn{6}{@{}l}{\textit{Illustration and cost checks}} \\
+\cmidrule(l){1-6}
+Motivation & RTX~3090~Ti + Jetson & Qwen2.5-7B / Qwen2.5-0.5B &
+ShareGPT, 128-token prompt cap, 8 output tokens &
+4, 8, 16, 32 & Edge overhead diagnostic, not an optimized edge-serving result \\
+Overhead & RTX~3090~Ti & Qwen2.5-0.5B / Qwen2.5-0.5B &
+Synthetic scheduler microbenchmark &
+8, 16, 32, 64 & CPU scheduler-cost scaling only \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+The appendix tables should be read as boundary documentation rather
+than as additional headline leaderboards. Table~\ref{tab:exp-setup}
+separates evidence used for the main scheduler claims from diagnostics
+that explain when the same control logic falls back, when cache pressure
+changes the preferred eviction rule, and how much CPU-side scheduling
+cost is added by the policy. This separation keeps the main text focused
+on calibrated three-seed comparisons while preserving the setup details
+needed to audit model-pair transfer, pressure sensitivity, and overhead.
+
+Tables~\ref{tab:model-pair-performance} and
+\ref{tab:model-pair-n32} report model-pair safety checks, so each row
+should be interpreted within its target/draft pair rather than as a
+cross-family ranking. At $N=16$, the detector disables speculation for
+the Qwen2.5-1.5B/0.5B and SmolLM2-1.7B/135M pairs, where the safe path
+stays close to NoSpec instead of following harmful speculative settings.
+For Pythia-2.8B/160M, the detector keeps speculation enabled and
+improves over NoSpec without claiming superiority over the offline-tuned
+BestFixed envelope or the TETRIS proxy. The $N=32$ table records the
+same boundary at higher concurrency: the Qwen2.5 pair remains unsafe for
+speculation, whereas the Pythia pair remains profitable.
+
+% Inlined from ../paper_assets/tables/model_pair_performance.tex.
+\begin{table*}[t]
+\centering
+\caption{Model-pair sensitivity and safe fallback at $N=16$ across three seeds. Values are SLO-aware goodput in tok/s ($\uparrow$), mean$\pm$std. Detector color gives the warm-up decision. The safe-fallback column reports paired lift against NoSpec.}
+\label{tab:model-pair-performance}
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{@{}p{0.10\textwidth}p{0.15\textwidth}ccccc cc@{}}
+\toprule
+\multirow{2}{*}{Family} & \multirow{2}{*}{Target / draft} &
+\multicolumn{3}{c}{Baselines ($\uparrow$)} &
+\multicolumn{2}{c}{\system{} variants ($\uparrow$)} &
+\multicolumn{2}{c}{Safety outcome} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-7}\cmidrule(l){8-9}
+ & & NoSpec & BestFixed & TETRIS-Proxy & plain & safe & Detector & Safe vs NoSpec \\
+\midrule
+Qwen2.5 & 1.5B / 0.5B & {\bfseries 99.4$\pm$5.9} & 80.3$\pm$7.4 & 65.6$\pm$5.1 & 70.0$\pm$8.8 & 98.8$\pm$6.3 & \dOFF{OFF} & \secondb{$-$0.7\%} \\
+SmolLM2~\cite{allal2025smollm2} & 1.7B / 135M & {\bfseries 120.5$\pm$8.4} & 41.5$\pm$3.4 & 33.0$\pm$6.2 & 23.8$\pm$13.5 & 115.0$\pm$13.7 & \dOFF{OFF} & \secondb{$-$4.7\%} \\
+Pythia~\cite{biderman2023pythia} & 2.8B / 160M & 87.0$\pm$1.2 & 131.4$\pm$7.0 & {\bfseries 134.4$\pm$17.6} & 126.1$\pm$11.4 & 127.5$\pm$15.0 & \dON{ON} & \pos{+46.6\%} \\
+\bottomrule
+\end{tabular}
+\vspace{-0.5em}
+\end{table*}
+
+% Inlined from ../paper_assets/tables/model_pair_n32.tex.
+\begin{table}[t]
+\centering
+\caption{Additional $N=32$ model-pair boundary checks across three seeds. Values are SLO-aware goodput in tok/s ($\uparrow$), mean$\pm$std. The last column reports paired \system{} lift against NoSpec.}
+\label{tab:model-pair-n32}
+\scriptsize
+\setlength{\tabcolsep}{2.8pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{@{}p{0.14\columnwidth}p{0.24\columnwidth}cccc@{}}
+\toprule
+Family & Target / draft & NoSpec & TETRIS-Proxy & \system{} & Lift \\
+\midrule
+Qwen2.5 & 1.5B / 0.5B & 96.6$\pm$3.1 & 48.0$\pm$5.1 & 53.5$\pm$4.4 & \bad{$-$44.6\%} \\
+Pythia~\cite{biderman2023pythia} & 2.8B / 160M & 96.3$\pm$2.2 & 146.5$\pm$2.9 & 148.6$\pm$4.4 & \pos{+54.3\%} \\
+\bottomrule
+\end{tabular}
+\vspace{-0.5em}
+\end{table}
+
+Table~\ref{tab:model-pair-pressure} isolates pressure cases that would
+be too detailed for the main result table. The KV-budget rows show that
+the best eviction variant can change with both model pair and memory
+budget, so these cells support the cache-regime boundary claim rather
+than a universal eviction-rule ranking. The SLO-pressure rows report the
+paired lift and confidence interval against NoSpec. The detector column
+therefore records whether the warm-up evidence would enable or disable
+speculation under that stressed setting.
+
+% Inlined from ../paper_assets/tables/model_pair_pressure.tex.
+\begin{table*}[t]
+\centering
+\caption{Additional $N=32$ model-pair pressure checks across three seeds. KV rows report SLO-aware goodput in tok/s ($\uparrow$). SLO rows report paired \system{} lift over NoSpec with 95\% confidence intervals.}
+\label{tab:model-pair-pressure}
+\scriptsize
+\setlength{\tabcolsep}{2.2pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{@{}p{0.10\textwidth}p{0.11\textwidth}p{0.12\textwidth}p{0.18\textwidth}p{0.16\textwidth}p{0.11\textwidth}p{0.08\textwidth}@{}}
+\toprule
+Family & Stressor & Setting & \system{} result & Best / reference & Lift or gap & Evidence \\
+\midrule
+\multicolumn{7}{@{}l}{\textit{KV-pressure: best eviction variant can change with pair and budget}} \\
+\cmidrule(l){1-7}
+Qwen2.5 & KV budget & 256 blocks & 53.2$\pm$6.1 & SpecSched-H2O 56.0$\pm$0.8 & \bad{$-$5.0\%} & goodput \\
+Qwen2.5 & KV budget & 512 blocks & 50.9$\pm$4.1 & SpecSched-Longest 58.7$\pm$3.5 & \bad{$-$13.3\%} & goodput \\
+Pythia & KV budget & 256 blocks & 131.6$\pm$5.8 & SpecSched-H2O 135.7$\pm$2.8 & \bad{$-$3.0\%} & goodput \\
+Pythia & KV budget & 512 blocks & 148.2$\pm$2.2 & SpecSched-H2O 152.1$\pm$1.5 & \bad{$-$2.6\%} & goodput \\
+\midrule
+\multicolumn{7}{@{}l}{\textit{SLO-pressure: detector decision follows the sign of paired CI}} \\
+\cmidrule(l){1-7}
+Qwen2.5 & SLO multiplier & $\beta=1.25$ & \bad{$-$53.8\%} & NoSpec & [$-$62.6\%, $-$45.0\%] & \dOFF{OFF} \\
+Qwen2.5 & SLO multiplier & $\beta=2.0$ & \bad{$-$31.6\%} & NoSpec & [$-$44.3\%, $-$19.0\%] & \dOFF{OFF} \\
+Pythia & SLO multiplier & $\beta=1.25$ & \pos{+90.5\%} & NoSpec & [+76.8\%, +104.2\%] & \dON{ON} \\
+Pythia & SLO multiplier & $\beta=2.0$ & \pos{+51.0\%} & NoSpec & [+50.3\%, +51.6\%] & \dON{ON} \\
+\bottomrule
+\end{tabular}
+\vspace{-0.5em}
+\end{table*}
+
+Table~\ref{tab:scheduler-overhead} is a CPU-side microbenchmark of the
+policy computation only. Its role is to check scaling with $N$ and
+$k_{\max}$ under a controlled local model pair. It is not an
+end-to-end serving comparison. The measured wall-time fractions remain
+below one percent, indicating that the reported goodput differences are
+not dominated by scheduler bookkeeping overhead.
+
+% Inlined from ../paper_assets/tables/scheduler_overhead.tex.
+\begin{table}[t]
+\centering
+\caption{CPU-side scheduler overhead microbenchmark on the 0.5B/0.5B local model pair. Values are microseconds per scheduling epoch. Blue shading scales with overhead within this table.}
+\label{tab:scheduler-overhead}
+\small
+\setlength{\tabcolsep}{3.2pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{rrrrr}
+\toprule
+$k_{\max}$ & $N$ & Mean ($\mu$s) $\downarrow$ & P95 policy ($\mu$s) $\downarrow$ & Wall (\%) $\downarrow$ \\
+\midrule
+3 & 8 & \heat{6}{128.8} & \heat{5}{54.8} & 0.15 \\
+3 & 16 & \heat{11}{151.3} & \heat{8}{65.5} & 0.19 \\
+3 & 32 & \heat{25}{220.0} & \heat{30}{148.1} & 0.20 \\
+3 & 64 & \heat{40}{294.8} & \heat{40}{184.2} & 0.28 \\
+\addlinespace
+5 & 8 & \heat{5}{125.2} & \heat{8}{65.6} & 0.15 \\
+5 & 16 & \heat{10}{146.7} & \heat{8}{65.7} & 0.18 \\
+5 & 32 & \heat{26}{224.7} & \heat{32}{156.1} & 0.22 \\
+5 & 64 & \heat{34}{263.0} & \heat{35}{165.3} & 0.25 \\
+\addlinespace
+7 & 8 & \heat{5}{123.2} & \heat{5}{56.3} & 0.14 \\
+7 & 16 & \heat{10}{147.9} & \heat{12}{82.0} & 0.18 \\
+7 & 32 & \heat{27}{232.2} & \heat{35}{167.5} & 0.23 \\
+7 & 64 & \heat{32}{256.6} & \heat{33}{159.3} & 0.26 \\
+\bottomrule
+\end{tabular}
+\vspace{-0.5em}
+\end{table}
+
+\section{Route and Remote-KV Stress Simulation}
+\label{app:route-kv-sim}
+
+This appendix reports the route/KV simulation referenced in
+Section~\ref{sec:stress-failure}. The simulation exercises distributed
+controls that the single-GPU artifact cannot execute directly. It uses
+the measured \system{} rows as its local-route baseline: the closed-loop
+$N$ sweep anchors local goodput and tail latency, and the three-seed
+KV-pressure rows anchor 512- and 1024-block cache behavior. It then
+varies four routing modes (local-only, random, KV-aware, and oracle),
+route delay in $\{0,2,5,10\}$ ms, KV budget, and concurrency. The
+modeled quantities are remote-KV hit ratio, migration rate, and routing
+oscillation. This experiment is a stress diagnostic for the route and
+cache variables in the main-text joint objective. It is not a native cluster
+measurement.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{figures_scientific/route_kv_ablation_scientific.pdf}
+    \caption{Routing and remote-KV stress simulation at $N=64$, 512 KV
+    blocks, and 5 ms route delay. The panels show that random routing
+    loses goodput and increases cache churn, while KV-aware routing
+    recovers throughput by trading remote hits against migration cost.}
+    \label{fig:route-kv-ablation}
+\end{figure*}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{figures_scientific/route_kv_joint_stress_scientific.pdf}
+    \caption{Joint stress surface for KV-aware routing at 5 ms route
+    delay. Goodput drops when high concurrency combines with the smaller
+    KV budget, showing the expected load--cache coupling.}
+    \label{fig:route-kv-stress}
+\end{figure}
+
+Figure~\ref{fig:route-kv-ablation} and
+Table~\ref{tab:route-kv-sim} separate route choice from local cache
+pressure. At $N=64$ and 512 KV blocks, local-only routing gives
+51.8 tok/s. Random routing falls to 43.3 tok/s and reaches an
+oscillation rate of 0.52 because requests move faster than remote KV
+reuse can amortize migration. KV-aware routing raises goodput to
+55.2 tok/s by increasing the remote-hit ratio to 0.41 while keeping
+oscillation lower at 0.33. The oracle upper bound reaches 61.5 tok/s,
+showing that route selection has material value but is limited by
+remote-delay-induced tail latency. KV utilization and eviction rates
+make the resource mechanism visible: the route that improves goodput is
+not merely the route with the most remote reuse, but the one that
+balances reuse against migration and cache churn. Figure~\ref{fig:route-kv-stress}
+shows the joint stress surface for KV-aware routing: increasing the KV
+budget from 512 to 1024 blocks raises goodput in every load cell, while
+the largest degradation appears at $N=64$ with the smaller cache. This
+matches the formulation's prediction that route cost and cache
+residency must be optimized together.
+
+% Inlined from ../paper_assets/tables/route_kv_stress_sim.tex.
+\begin{table}[t]
+\centering
+\caption{Routing and remote-KV stress simulation at $N=64$, 512 KV
+blocks, and 5 ms route delay. Values are calibrated simulation means
+over five deterministic replicates.}
+\label{tab:route-kv-sim}
+\scriptsize
+\setlength{\tabcolsep}{3.2pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Route & Goodput $\uparrow$ & P99 $\downarrow$ & Hit & Osc. \\
+\midrule
+local-only & 51.8 & 1386 & 0.00 & 0.00 \\
+random & 43.3 & 1835 & 0.15 & 0.52 \\
+kv-aware & 55.2 & 1621 & 0.41 & 0.33 \\
+oracle & 61.5 & 1607 & 0.59 & 0.29 \\
+\bottomrule
+\end{tabular}
+\vspace{-0.5em}
+\end{table}
+
+\section{Open-Loop Controller Diagnostics}
+\label{app:open-loop-diag}
+
+We tested the diagnostic variants described in the main-text guardrail
+discussion. In a fixed-seed Poisson probe,
+\textit{\system{}-RegimeAware} improves SLO-aware goodput at $N=16$
+from 76.96~tok/s for FixedK-1 and 78.23~tok/s for \system{} to
+78.43~tok/s, while reducing P99 TPOT from 1052.6 to
+1030.9~ms/token relative to \system{}. At $N=32$, however, it drops
+to 68.47~tok/s, below FixedK-1 (69.58~tok/s) and \system{}
+(69.84~tok/s). The stronger \textit{\system{}-AIMD} controller
+explicitly uses pending delay and multiplicatively caps open-loop
+draft length. It reduces selected draft length to 1.0 and lowers P99
+TPOT at $N=16$ from 1050.8 to 1039.2~ms/token, but goodput falls from
+78.23 to 77.75~tok/s. At $N=32$, it further reduces goodput from
+68.71 to 67.36~tok/s and does not improve P99 TPOT. These diagnostics
+show that queue pressure and arrival regime should be explicit
+scheduler inputs, but also that queue-age ordering and a global
+draft-cap controller are too blunt.
+
+We therefore ran a third fixed-seed probe with two stronger open-loop
+controllers. \textit{\system{}-Backpressure} exposes ready-pending
+backlog through admission throttling and inserts arrival pressure,
+oldest pending delay, acceptance prior, and KV pressure into the
+per-request marginal utility and draft cap. At $N=16$, Backpressure
+obtains 82.74~tok/s versus 82.12~tok/s for FixedK-1, while reducing
+P99 TPOT from 1101.4 to 1024.5~ms/token and lowering target forwards
+per token from 0.563 to 0.539. At $N=32$, it obtains 78.46~tok/s
+versus 77.95~tok/s for FixedK-1 and lowers target forwards per token
+from 0.569 to 0.563, but P99 TPOT increases from 1522.7 to
+1763.9~ms/token. The selected draft length remains close to one
+($1.12$ at $N=16$ and $1.02$ at $N=32$), meaning the controller mainly
+prevents harmful deep drafting and uses speculative depth only
+opportunistically.
+
+\textit{\system{}-PressureAIMD} adds a stateful AIMD controller over
+the batch-level extra-draft budget and switches to admission-stable
+batching under open-loop backlog. A recovery-gated fractional-credit
+variant avoids the earlier failure mode where AIMD reduced target
+forwards but increased KV evictions or verifier service time. Across
+seeds 7, 42, and 123, this controller consistently keeps KV evictions
+equal to FixedK-1 and releases only shallow extra drafts. It also
+slightly reduces target forwards per token in every completed cell.
+At $N=16$, PressureAIMD obtains
+71.14$\pm$8.10~tok/s versus 68.02$\pm$10.62~tok/s for FixedK-1, and
+raises mean SLO attainment from 0.859 to 0.891. The paired goodput lift
+is 5.14\%, but its 95\% confidence interval is
+$[-9.63\%, 19.92\%]$. At $N=32$, it obtains
+71.81$\pm$3.27~tok/s versus 71.93$\pm$3.44~tok/s for FixedK-1, with
+the same mean SLO attainment (0.896) and a paired lift of $-0.16\%$
+with confidence interval $[-1.11\%, 0.79\%]$. The measurements support
+the design direction of using arrival pressure and pending delay
+directly in control and marginal utility. They also show that the
+current controller is best interpreted as a diagnostic stabilization
+mechanism: it prevents harmful deep drafting and lowers target-model
+work, but it is not yet a validated replacement for the main
+algorithmic claim.
+
+
+% ============================================================
+%              REFERENCES
+% ============================================================
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}

@@ -1,0 +1,57 @@
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Local model checkpoints and hardware logs.
+models/
+logs/
+profile/
+
+# Experiment outputs.
+results/**
+!results/
+!results/raw/
+!results/raw/.gitkeep
+!results/processed/
+!results/processed/.gitkeep
+!results/figures/
+!results/figures/.gitkeep
+
+paper_assets/**
+!paper_assets/
+!paper_assets/figures/
+!paper_assets/figures/.gitkeep
+!paper_assets/tables/
+!paper_assets/tables/.gitkeep
+
+experiments/**/results/**
+experiments/**/figures/**
+experiments/**/logs/**
+dist/
+
+# Data files are not committed. Generate a tiny synthetic trace for smoke tests
+# or place ShareGPT/LMSYS-style traces here locally.
+data/*
+!data/.gitkeep
+!data/README.md
+
+# LaTeX/build artifacts.
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.zip
+*.csv
+*.jsonl

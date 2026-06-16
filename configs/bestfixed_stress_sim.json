@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "experiment": {
+    "name": "bestfixed_stress_sim",
+    "seed": 7,
+    "description": "Calibrated stress diagnostic for when online control matters against a fixed-k envelope. This does not rerun GPU inference."
+  },
+  "paths": {
+    "raw_dir": "${PROJECT_ROOT}/results/raw/bestfixed_stress_sim",
+    "processed_dir": "${PROJECT_ROOT}/results/processed",
+    "source_main_summary": "${PROJECT_ROOT}/results/tpds_multiseed_main/processed/main_multiseed_summary.csv"
+  },
+  "simulation": {
+    "concurrency_N": [32, 64],
+    "replicates": 5,
+    "fixed_policies": ["FixedK-1", "FixedK-3", "FixedK-5", "FixedK-7"],
+    "methods": ["BestFixed-Global", "BestFixed-PhaseTuned", "SpecSched"],
+    "scenarios": {
+      "workload_shift": {
+        "segments": ["high_acceptance", "low_acceptance", "mixed"],
+        "segment_weights": [0.34, 0.33, 0.33],
+        "best_fixed_by_segment": {
+          "high_acceptance": "FixedK-7",
+          "low_acceptance": "FixedK-1",
+          "mixed": "FixedK-3"
+        },
+        "fixed_mismatch_penalty": {
+          "high_acceptance": {"FixedK-1": 0.76, "FixedK-3": 0.80, "FixedK-5": 1.08, "FixedK-7": 1.20},
+          "low_acceptance": {"FixedK-1": 1.16, "FixedK-3": 0.76, "FixedK-5": 0.68, "FixedK-7": 0.55},
+          "mixed": {"FixedK-1": 0.86, "FixedK-3": 1.08, "FixedK-5": 0.97, "FixedK-7": 0.82}
+        },
+        "specsched_relative_to_phase_best": 0.990,
+        "specsched_recovery_s": 18.0
+      },
+      "bursty_arrival": {
+        "segments": ["calm", "burst", "recovery"],
+        "segment_weights": [0.50, 0.25, 0.25],
+        "best_fixed_by_segment": {
+          "calm": "FixedK-5",
+          "burst": "FixedK-1",
+          "recovery": "FixedK-3"
+        },
+        "fixed_mismatch_penalty": {
+          "calm": {"FixedK-1": 0.84, "FixedK-3": 0.95, "FixedK-5": 1.12, "FixedK-7": 1.03},
+          "burst": {"FixedK-1": 1.15, "FixedK-3": 0.62, "FixedK-5": 0.50, "FixedK-7": 0.40},
+          "recovery": {"FixedK-1": 0.96, "FixedK-3": 1.08, "FixedK-5": 0.86, "FixedK-7": 0.72}
+        },
+        "specsched_relative_to_phase_best": 0.985,
+        "specsched_recovery_s": 10.0
+      },
+      "tiered_slo": {
+        "segments": ["tight", "medium", "loose"],
+        "segment_weights": [0.30, 0.50, 0.20],
+        "best_fixed_by_segment": {
+          "tight": "FixedK-1",
+          "medium": "FixedK-3",
+          "loose": "FixedK-7"
+        },
+        "fixed_mismatch_penalty": {
+          "tight": {"FixedK-1": 1.18, "FixedK-3": 0.72, "FixedK-5": 0.58, "FixedK-7": 0.46},
+          "medium": {"FixedK-1": 0.90, "FixedK-3": 1.08, "FixedK-5": 0.96, "FixedK-7": 0.83},
+          "loose": {"FixedK-1": 0.72, "FixedK-3": 0.82, "FixedK-5": 1.02, "FixedK-7": 1.18}
+        },
+        "specsched_relative_to_phase_best": 0.990,
+        "specsched_recovery_s": 0.0
+      }
+    },
+    "global_fixed_policy": {
+      "32": "FixedK-3",
+      "64": "FixedK-3"
+    },
+    "max_goodput_jitter": 0.018,
+    "max_latency_jitter": 0.025
+  }
+}

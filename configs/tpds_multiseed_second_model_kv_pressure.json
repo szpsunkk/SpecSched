@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "base_config": "${PROJECT_ROOT}/configs/paper3090_second_model_kv_pressure.json",
+  "results_root": "${PROJECT_ROOT}/results/tpds_multiseed_second_model_kv_pressure",
+  "generated_config_dir": "${PROJECT_ROOT}/configs/generated",
+  "generated_config_namespace": "tpds_multiseed_second_model_kv_pressure",
+  "reference_results": [],
+  "seeds": [7, 42, 123],
+  "include_experiments": ["second_model_kv256", "second_model_kv512"],
+  "Ns": [32],
+  "policies": [
+    "SpecSched",
+    "SpecSched-LRU",
+    "SpecSched-Longest",
+    "SpecSched-H2O"
+  ],
+  "aggregate_policies": [
+    "SpecSched",
+    "SpecSched-LRU",
+    "SpecSched-Longest",
+    "SpecSched-H2O"
+  ],
+  "summary_files": ["scheduler_kv_sweep_summary.csv"],
+  "group_fields": ["configured_kv_blocks"],
+  "expected_groups": [
+    {"configured_kv_blocks": "256"},
+    {"configured_kv_blocks": "512"}
+  ],
+  "focus_policy": "SpecSched",
+  "paired_baselines": [
+    "SpecSched-LRU",
+    "SpecSched-Longest",
+    "SpecSched-H2O"
+  ],
+  "skip_existing": true
+}

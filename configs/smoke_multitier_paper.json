@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "experiment": {
+    "name": "paper_smoke_multitier",
+    "seed": 123
+  },
+  "paths": {
+    "results_root": "${PROJECT_ROOT}/results/smoke_multitier",
+    "legacy_results_roots": [],
+    "trace": "${PROJECT_ROOT}/data/sharegpt_trace.json"
+  },
+  "models": {
+    "target": "${PROJECT_ROOT}/models/models--Qwen--Qwen2.5-0.5B-Instruct",
+    "draft": "${PROJECT_ROOT}/models/models--Qwen--Qwen2.5-0.5B-Instruct",
+    "target_label": "Qwen2.5-0.5B-Instruct",
+    "draft_label": "Qwen2.5-0.5B-Instruct",
+    "draft_backend": "local"
+  },
+  "cuda": {
+    "pytorch_cuda_alloc_conf": "expandable_segments:True"
+  },
+  "execution": {
+    "python": "python",
+    "isolate_by": "experiment_n",
+    "continue_on_error": false,
+    "skip_existing": false
+  },
+  "common": {
+    "fixed_ks": [1],
+    "kmax": 1,
+    "block_tokens": 16,
+    "max_batch": 1,
+    "cache_replay_chunk_tokens": 8,
+    "calib_requests": 1,
+    "requests_per_N": 6,
+    "adaptive_slo_tpot_mult": 2.0,
+    "adaptive_slo_ttft_mult": 2.0,
+    "adaptive_slo_scope": "bucket",
+    "arrival_model": "closed_loop",
+    "tier_names": ["free", "pro", "enterprise"],
+    "tier_weights": [2, 2, 2],
+    "tier_tpot_mults": [1.5, 1.0, 0.75],
+    "tier_ttft_mults": [1.5, 1.0, 0.75]
+  },
+  "experiments": [
+    {
+      "name": "main_smoke_multitier",
+      "kind": "main",
+      "tag": "smoke_multitier_main",
+      "Ns": [6],
+      "kv_blocks": 64,
+      "max_new_tokens": 2,
+      "output_lengths": [2],
+      "prompt_hard_max": 64,
+      "beta": 2.0,
+      "policies": ["NoSpec", "FixedK-1", "TETRIS-Proxy", "SpecSched"]
+    }
+  ]
+}

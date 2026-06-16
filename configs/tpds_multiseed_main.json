@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "base_config": "${PROJECT_ROOT}/configs/paper3090_v3_kcap3.json",
+  "results_root": "${PROJECT_ROOT}/results/tpds_multiseed_main",
+  "generated_config_dir": "${PROJECT_ROOT}/configs/generated",
+  "generated_config_namespace": "tpds_multiseed_main",
+  "reference_results": [
+    {
+      "seed": 7,
+      "processed_summary": "${PROJECT_ROOT}/results/local_v3_kcap3/processed/scheduler_main_summary.csv"
+    }
+  ],
+  "seeds": [
+    42,
+    123
+  ],
+  "include_experiments": [
+    "main_beta15"
+  ],
+  "Ns": [
+    16,
+    32,
+    64
+  ],
+  "policies": [
+    "NoSpec",
+    "FixedK-1",
+    "FixedK-3",
+    "FixedK-5",
+    "FixedK-7",
+    "IndepOpt",
+    "TETRIS-Proxy",
+    "SpecSched"
+  ],
+  "aggregate_policies": [
+    "NoSpec",
+    "FixedK-1",
+    "FixedK-3",
+    "FixedK-5",
+    "FixedK-7",
+    "IndepOpt",
+    "TETRIS-Proxy",
+    "SpecSched"
+  ],
+  "skip_existing": true
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "base_config": "${PROJECT_ROOT}/configs/paper3090_pressure_aimd_probe_v4_base.json",
+  "results_root": "${PROJECT_ROOT}/results/pressure_aimd_multiseed_targeted_v4",
+  "generated_config_dir": "${PROJECT_ROOT}/configs/generated_pressure_aimd",
+  "reference_results": [],
+  "seeds": [7, 42, 123],
+  "include_experiments": ["pressure_aimd_poisson"],
+  "Ns": [16, 32],
+  "policies": ["FixedK-1", "SpecSched-PressureAIMD"],
+  "aggregate_policies": ["FixedK-1", "SpecSched-PressureAIMD"],
+  "focus_policy": "SpecSched-PressureAIMD",
+  "skip_existing": true
+}

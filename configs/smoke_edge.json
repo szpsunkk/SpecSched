@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "experiment": {
+    "name": "smoke_edge",
+    "seed": 7
+  },
+  "paths": {
+    "results_root": "${PROJECT_ROOT}/results/edge_smoke",
+    "legacy_results_roots": [],
+    "trace": "${PROJECT_ROOT}/data/sharegpt_trace.json"
+  },
+  "models": {
+    "target": "${PROJECT_ROOT}/models/models--Qwen--Qwen2.5-7B-Instruct",
+    "draft": "${PROJECT_ROOT}/models/models--Qwen--Qwen2.5-0.5B-Instruct",
+    "target_label": "Qwen2.5-7B-Instruct",
+    "draft_label": "Qwen2.5-0.5B-Instruct-edge",
+    "draft_backend": "edge",
+    "draft_remote": "~/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct",
+    "edge_hosts": "100.66.37.19,100.107.23.95,100.73.217.47",
+    "edge_user": "skk",
+    "edge_password": "111",
+    "edge_request_timeout_s": 600
+  },
+  "cuda": {
+    "pytorch_cuda_alloc_conf": "expandable_segments:True"
+  },
+  "execution": {
+    "python": "python",
+    "isolate_by": "experiment_n",
+    "continue_on_error": false,
+    "skip_existing": false
+  },
+  "common": {
+    "fixed_ks": [
+      1
+    ],
+    "kmax": 1,
+    "block_tokens": 16,
+    "max_batch": 1,
+    "cache_replay_chunk_tokens": 8,
+    "log_every_steps": 0,
+    "calib_requests": 1,
+    "requests_per_N": 1,
+    "adaptive_slo_tpot_mult": 2.0,
+    "adaptive_slo_ttft_mult": 2.0,
+    "adaptive_slo_scope": "bucket"
+  },
+  "experiments": [
+    {
+      "name": "edge_smoke_main",
+      "kind": "main",
+      "tag": "edge_smoke_main",
+      "Ns": [
+        1
+      ],
+      "kv_blocks": 64,
+      "max_new_tokens": 2,
+      "output_lengths": [
+        2
+      ],
+      "prompt_hard_max": 64,
+      "beta": 2.0,
+      "policies": [
+        "NoSpec",
+        "SpecSched"
+      ]
+    },
+    {
+      "name": "edge_smoke_baseline",
+      "kind": "baseline",
+      "tag": "edge_smoke_baseline",
+      "Ns": [
+        1
+      ],
+      "kv_blocks": 64,
+      "max_new_tokens": 2,
+      "output_lengths": [
+        2
+      ],
+      "prompt_hard_max": 64,
+      "beta": 2.0,
+      "policies": [
+        "FixedK-1",
+        "IndepOpt",
+        "TETRIS-Proxy"
+      ]
+    },
+    {
+      "name": "edge_smoke_ablation",
+      "kind": "ablation",
+      "tag": "edge_smoke_ablation",
+      "Ns": [
+        1
+      ],
+      "kv_blocks": 64,
+      "max_new_tokens": 2,
+      "output_lengths": [
+        2
+      ],
+      "prompt_hard_max": 64,
+      "beta": 2.0,
+      "policies": [
+        "SpecSched-NoBatch",
+        "SpecSched-NoEvict",
+        "SpecSched-NoSLO"
+      ]
+    }
+  ]
+}

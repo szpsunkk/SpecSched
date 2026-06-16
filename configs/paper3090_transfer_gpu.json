@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "experiment": {
+    "name": "paper3090_transfer_gpu",
+    "seed": 7
+  },
+  "paths": {
+    "results_root": "${PROJECT_ROOT}/results/transfer_gpu",
+    "legacy_results_roots": [],
+    "trace": "${PROJECT_ROOT}/data/sharegpt_trace.json"
+  },
+  "models": {
+    "target": "${PROJECT_ROOT}/models/models--Qwen--Qwen2.5-7B-Instruct",
+    "draft": "${PROJECT_ROOT}/models/models--Qwen--Qwen2.5-0.5B-Instruct",
+    "target_label": "Qwen2.5-7B-Instruct",
+    "draft_label": "Qwen2.5-0.5B-Instruct",
+    "draft_backend": "local"
+  },
+  "cuda": {
+    "pytorch_cuda_alloc_conf": "expandable_segments:True"
+  },
+  "execution": {
+    "python": "python",
+    "isolate_by": "experiment_n",
+    "continue_on_error": true,
+    "skip_existing": true
+  },
+  "common": {
+    "fixed_ks": [1, 3, 5, 7],
+    "kmax": 7,
+    "block_tokens": 16,
+    "max_batch": 4,
+    "max_admit_per_step": 4,
+    "cache_replay_chunk_tokens": 32,
+    "calib_requests": 6,
+    "requests_per_N": 96,
+    "adaptive_slo_tpot_mult": 1.5,
+    "adaptive_slo_ttft_mult": 2.0,
+    "adaptive_slo_scope": "bucket",
+    "arrival_model": "trace"
+  },
+  "experiments": [
+    {
+      "name": "transfer_workload_shift",
+      "kind": "transfer_gpu",
+      "tag": "paper3090_transfer_shift",
+      "Ns": [64],
+      "kv_blocks": 1024,
+      "max_new_tokens": 128,
+      "output_lengths": [64, 96, 128],
+      "prompt_hard_max": 768,
+      "beta": 1.5,
+      "arrival_trace": "${PROJECT_ROOT}/data/transfer_traces/workload_shift_seed{seed}.jsonl",
+      "policies": ["FixedK-1", "FixedK-3", "FixedK-5", "FixedK-7", "SpecSched"]
+    },
+    {
+      "name": "transfer_bursty_arrival",
+      "kind": "transfer_gpu",
+      "tag": "paper3090_transfer_bursty",
+      "Ns": [64],
+      "kv_blocks": 512,
+      "max_new_tokens": 128,
+      "output_lengths": [64, 96, 128],
+      "prompt_hard_max": 768,
+      "beta": 1.5,
+      "arrival_trace": "${PROJECT_ROOT}/data/transfer_traces/bursty_arrival_seed{seed}.jsonl",
+      "policies": ["FixedK-1", "FixedK-3", "FixedK-5", "FixedK-7", "SpecSched"]
+    },
+    {
+      "name": "transfer_tiered_slo",
+      "kind": "transfer_gpu",
+      "tag": "paper3090_transfer_tiered",
+      "Ns": [64],
+      "kv_blocks": 1024,
+      "max_new_tokens": 128,
+      "output_lengths": [64, 96, 128],
+      "prompt_hard_max": 768,
+      "beta": 1.5,
+      "arrival_trace": "${PROJECT_ROOT}/data/transfer_traces/tiered_slo_seed{seed}.jsonl",
+      "tier_names": ["tier1", "tier2", "tier3"],
+      "tier_weights": [0.3, 0.5, 0.2],
+      "tier_tpot_mults": [0.73, 1.0, 2.0],
+      "tier_ttft_mults": [0.73, 1.0, 2.0],
+      "policies": ["FixedK-1", "FixedK-3", "FixedK-5", "FixedK-7", "SpecSched", "SpecSched-NoSLO"]
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "experiment": {
+    "name": "smoke_evict_guarded",
+    "seed": 123
+  },
+  "paths": {
+    "results_root": "${PROJECT_ROOT}/results/smoke_evict_guarded",
+    "legacy_results_roots": [],
+    "trace": "${PROJECT_ROOT}/data/sharegpt_trace.json"
+  },
+  "models": {
+    "target": "${PROJECT_ROOT}/models/models--Qwen--Qwen2.5-0.5B-Instruct",
+    "draft": "${PROJECT_ROOT}/models/models--Qwen--Qwen2.5-0.5B-Instruct",
+    "target_label": "Qwen2.5-0.5B-Instruct",
+    "draft_label": "Qwen2.5-0.5B-Instruct",
+    "draft_backend": "local"
+  },
+  "cuda": {
+    "pytorch_cuda_alloc_conf": "expandable_segments:True"
+  },
+  "execution": {
+    "python": "python",
+    "isolate_by": "experiment_n",
+    "continue_on_error": false,
+    "skip_existing": false
+  },
+  "common": {
+    "fixed_ks": [1],
+    "kmax": 3,
+    "block_tokens": 16,
+    "max_batch": 2,
+    "cache_replay_chunk_tokens": 8,
+    "calib_requests": 1,
+    "requests_per_N": 2,
+    "adaptive_slo_tpot_mult": 2.0,
+    "adaptive_slo_ttft_mult": 2.0,
+    "adaptive_slo_scope": "bucket"
+  },
+  "experiments": [
+    {
+      "name": "evict_guarded_smoke",
+      "kind": "smoke",
+      "tag": "smoke_evict_guarded",
+      "Ns": [2],
+      "kv_blocks": 32,
+      "max_new_tokens": 4,
+      "output_lengths": [4],
+      "prompt_hard_max": 64,
+      "beta": 2.0,
+      "policies": [
+        "SpecSched",
+        "SpecSched-EvictV2",
+        "SpecSched-EvictGuarded",
+        "SpecSched-EvictCalibrated",
+        "SpecSched-LRU"
+      ]
+    }
+  ]
+}
