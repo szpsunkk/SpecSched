@@ -3,8 +3,8 @@
 SpecSched is a research prototype for cache-coupled speculative scheduling in
 multi-tenant LLM serving. This public repository contains the code, configs, and
 reproduction scripts needed to rerun the experiments. It intentionally excludes
-model checkpoints, generated results, private traces, logs, and paper build
-artifacts.
+model checkpoints, generated results, private traces, logs, and the paper LaTeX
+source. The compiled paper and its supplement are in `paper/`.
 
 ## Repository Layout
 
@@ -14,7 +14,7 @@ experiments/scheduler/       Scheduler engine, policies, KV policies, workload l
 experiments/real_matrix/     Config-driven experiment runner and processors.
 experiments/motivation/      Edge/cloud motivation benchmark code.
 scripts/                     Plotting, audits, and helper scripts.
-main/                        Paper LaTeX source only, no compiled PDFs.
+paper/                       Compiled manuscript (SpecSched.pdf) and supplement.
 data/                        Local trace location, ignored by Git.
 results/                     Local raw/processed/figure outputs, ignored by Git.
 paper_assets/                Local generated paper figures/tables, ignored by Git.
